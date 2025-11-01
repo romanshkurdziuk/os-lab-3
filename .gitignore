@@ -1,0 +1,8 @@
+# Compiled output
+*.exe
+*.obj
+*.o
+*.dll
+
+# VS Code specific
+.vscode/
