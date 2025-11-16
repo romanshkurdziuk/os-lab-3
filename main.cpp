@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <sstream>
 
+using namespace std;
+
 CRITICAL_SECTION cs;
 
 struct MarkerThreadParams
@@ -20,15 +22,13 @@ DWORD WINAPI marker_thread(LPVOID params)
 {
     MarkerThreadParams* p = static_cast<MarkerThreadParams*>(params);
     int id = p->id;
-    std::vector<int>& arr = *(p->arr);
+    vector<int>& arr = *(p->arr);
     int arraySize = p->arraySize;
 
     {
-        std::stringstream ss;
+        stringstream ss;
         ss << "Marker thread #" << id << " created and waiting for start signal.\n";
-        EnterCriticalSection(&cs);
-        std::cout << ss.str();
-        LeaveCriticalSection(&cs);
+        cout << ss.str();
     }
 
     WaitForSingleObject(p->hStartEvent, INFINITE);
@@ -42,10 +42,12 @@ DWORD WINAPI marker_thread(LPVOID params)
         bool isBlocked = false;
 
         EnterCriticalSection(&cs);
-        if (arr[index] == 0) {
+        if (arr[index] == 0) 
+        {
             arr[index] = id;
             markedCount++;
-        } else {
+        } else 
+        {
             isBlocked = true;
         }
         LeaveCriticalSection(&cs);
@@ -53,10 +55,10 @@ DWORD WINAPI marker_thread(LPVOID params)
         if (isBlocked)
         {
             {
-                std::stringstream ss;
-                ss << "Thread #" << id << ": cannot mark element " << index << ". Marked elements: " << markedCount << ". Waiting...\n";
+                stringstream ss;
                 EnterCriticalSection(&cs);
-                std::cout << ss.str();
+                ss << "Thread #" << id << ": cannot mark element " << index << ". Marked elements: " << markedCount << ". Waiting...\n";
+                cout << ss.str();
                 LeaveCriticalSection(&cs);
             }
 
@@ -67,11 +69,14 @@ DWORD WINAPI marker_thread(LPVOID params)
             bool should_terminate = (*(p->thread_to_terminate_id) == id);
             LeaveCriticalSection(&cs);
 
-            if (should_terminate) {
+            if (should_terminate) 
+            {
                 EnterCriticalSection(&cs);
-                std::cout << "Thread #" << id << " received terminate signal, cleaning up." << std::endl;
-                for (int i = 0; i < arraySize; ++i) {
-                    if (arr[i] == id) {
+                cout << "Thread #" << id << " received terminate signal, cleaning up." << endl;
+                for (int i = 0; i < arraySize; ++i) 
+                {
+                    if (arr[i] == id) 
+                    {
                         arr[i] = 0;
                     }
                 }
@@ -86,49 +91,53 @@ DWORD WINAPI marker_thread(LPVOID params)
         }
     }
 
-    std::cout << "Thread #" << id << " is finishing its work." << std::endl;
+    cout << "Thread #" << id << " is finishing its work." << endl;
     delete p;
     return 0;
 }
 
-void print_array(const std::vector<int>& arr)
+void print_array(const vector<int>& arr)
 {
     EnterCriticalSection(&cs);
-    for (int element : arr) {
-        std::cout << element << " ";
+    cout << "[ ";
+    for (int element : arr) 
+    {
+        cout << element << " ";
     }
-    std::cout << std::endl;
+    cout << "]" << endl;
     LeaveCriticalSection(&cs);
 }
 
 int main()
 {
     int arraySize;
-    std::cout << "Enter the size of the array: ";
-    std::cin >> arraySize;
+    cout << "Enter the size of the array: ";
+    cin >> arraySize;
 
     int markersCount;
-    std::cout << "Enter the number of marker threads: ";
-    std::cin >> markersCount;
+    cout << "Enter the number of marker threads: ";
+    cin >> markersCount;
 
-    std::vector<int> arr(arraySize, 0);
+    vector<int> arr(arraySize, 0);
     InitializeCriticalSection(&cs);
 
-    std::vector<HANDLE> hMarkers(markersCount);
-    std::vector<int> marker_ids(markersCount);
-    std::vector<HANDLE> hBlockedEvents(markersCount);
-    std::vector<HANDLE> hResumeEvents(markersCount);
+    vector<HANDLE> hMarkers(markersCount);
+    vector<int> marker_ids(markersCount);
+    vector<HANDLE> hBlockedEvents(markersCount);
+    vector<HANDLE> hResumeEvents(markersCount);
     int thread_to_terminate_id = -1;
 
     HANDLE hStartEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 
-    for (int i = 0; i < markersCount; ++i) {
+    for (int i = 0; i < markersCount; ++i) 
+    {
         marker_ids[i] = i;
         hBlockedEvents[i] = CreateEvent(NULL, TRUE, FALSE, NULL);
         hResumeEvents[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
     }
 
-    for (int i = 0; i < markersCount; ++i) {
+    for (int i = 0; i < markersCount; ++i) 
+    {
         MarkerThreadParams *params = new MarkerThreadParams();
         params->id = marker_ids[i];
         params->arr = &arr;
@@ -137,43 +146,50 @@ int main()
         params->hBlockedEvent = hBlockedEvents[i];
         params->hResumeEvent = hResumeEvents[i];
         params->thread_to_terminate_id = &thread_to_terminate_id;
-
         hMarkers[i] = CreateThread(NULL, 0, marker_thread, params, 0, NULL);
     }
 
-    std::cout << "All threads created. Press Enter to start." << std::endl;
-    std::cin.ignore();
-    std::cin.get();
-    std::cout << "\n--- START ---" << std::endl;
+    EnterCriticalSection(&cs);
+    cout << "All threads created. Press Enter to start." << endl;
+    LeaveCriticalSection(&cs);
+
+    cin.ignore();
+    cin.get();
+    cout << "--- START ---" << endl;
     SetEvent(hStartEvent);
 
     int activeMarkersCount = markersCount;
     while (activeMarkersCount > 0)
     {
         WaitForMultipleObjects(activeMarkersCount, hBlockedEvents.data(), TRUE, INFINITE);
-        for(int i = 0; i < activeMarkersCount; ++i) {
+        for(int i = 0; i < activeMarkersCount; ++i) 
+        {
             ResetEvent(hBlockedEvents[i]);
         }
         
-        std::cout << "\nAll active threads are blocked. Array state:" << std::endl;
+        cout << "\nAll active threads are blocked. Array state:" << endl;
         print_array(arr);
 
         int terminate_id_input = -1;
         int terminate_idx = -1;
         bool id_found = false;
         
-        while (!id_found) {
-            std::cout << "Enter ID of thread to terminate: ";
-            std::cin >> terminate_id_input;
-            for (int i = 0; i < activeMarkersCount; i++) {
-                if (marker_ids[i] == terminate_id_input) {
+        while (!id_found) 
+        {
+            cout << "Enter ID of thread to terminate: ";
+            cin >> terminate_id_input;
+            for (int i = 0; i < activeMarkersCount; i++) 
+            {
+                if (marker_ids[i] == terminate_id_input) 
+                {
                     terminate_idx = i;
                     id_found = true;
                     break;
                 }
             }
-            if (!id_found) {
-                 std::cout << "Invalid ID. Please enter an active thread ID." << std::endl;
+            if (!id_found) 
+            {
+                cout << "Invalid ID. Please enter an active thread ID." << endl;
             }
         }
 
@@ -184,7 +200,7 @@ int main()
         SetEvent(hResumeEvents[terminate_idx]);
         WaitForSingleObject(hMarkers[terminate_idx], INFINITE);
         
-        std::cout << "Thread #" << terminate_id_input << " has terminated. Array state after cleanup:" << std::endl;
+        cout << "Thread #" << terminate_id_input << " has terminated. Array state after cleanup:" << endl;
         print_array(arr);
 
         CloseHandle(hMarkers[terminate_idx]);
@@ -192,29 +208,31 @@ int main()
         CloseHandle(hResumeEvents[terminate_idx]);
 
         activeMarkersCount--;
-        if (terminate_idx < activeMarkersCount) {
+        if (terminate_idx < activeMarkersCount) 
+        {
             hMarkers[terminate_idx] = hMarkers[activeMarkersCount];
             marker_ids[terminate_idx] = marker_ids[activeMarkersCount];
             hBlockedEvents[terminate_idx] = hBlockedEvents[activeMarkersCount];
             hResumeEvents[terminate_idx] = hResumeEvents[activeMarkersCount];
         }
 
-        if (activeMarkersCount > 0) {
-            std::cout << "Press Enter to resume remaining threads..." << std::endl;
-            std::cin.ignore();
-            std::cin.get();
+        if (activeMarkersCount > 0) 
+        {
+            cout << "Press Enter to resume remaining threads..." << endl;
+            cin.ignore();
+            cin.get();
             
             EnterCriticalSection(&cs);
             thread_to_terminate_id = -1;
             LeaveCriticalSection(&cs);
-
-            for(int i = 0; i < activeMarkersCount; ++i) {
+            for(int i = 0; i < activeMarkersCount; ++i) 
+            {
                 SetEvent(hResumeEvents[i]);
             }
         }
     }
 
-    std::cout << "\n--- ALL WORK IS COMPLETED ---" << std::endl;
+    cout << "\n--- ALL WORK IS COMPLETED ---" << std::endl;
 
     CloseHandle(hStartEvent);
     DeleteCriticalSection(&cs);
