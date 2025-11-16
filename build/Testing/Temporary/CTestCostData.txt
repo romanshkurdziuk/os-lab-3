@@ -1,0 +1,4 @@
+ArrayFormatting.HandlesEmptyVector 3 0.00488967
+ArrayFormatting.HandlesSingleElementVector 1 0.0153528
+ArrayFormatting.HandlesMultipleElementsVector 1 0.0156958
+---

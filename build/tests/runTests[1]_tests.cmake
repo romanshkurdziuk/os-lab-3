@@ -1,0 +1,7 @@
+add_test([=[ArrayFormatting.HandlesEmptyVector]=]  D:/VS/OS/os-lab-3/build/tests/runTests.exe [==[--gtest_filter=ArrayFormatting.HandlesEmptyVector]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[ArrayFormatting.HandlesEmptyVector]=]  PROPERTIES WORKING_DIRECTORY D:/VS/OS/os-lab-3/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[ArrayFormatting.HandlesSingleElementVector]=]  D:/VS/OS/os-lab-3/build/tests/runTests.exe [==[--gtest_filter=ArrayFormatting.HandlesSingleElementVector]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[ArrayFormatting.HandlesSingleElementVector]=]  PROPERTIES WORKING_DIRECTORY D:/VS/OS/os-lab-3/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[ArrayFormatting.HandlesMultipleElementsVector]=]  D:/VS/OS/os-lab-3/build/tests/runTests.exe [==[--gtest_filter=ArrayFormatting.HandlesMultipleElementsVector]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[ArrayFormatting.HandlesMultipleElementsVector]=]  PROPERTIES WORKING_DIRECTORY D:/VS/OS/os-lab-3/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set(  runTests_TESTS ArrayFormatting.HandlesEmptyVector ArrayFormatting.HandlesSingleElementVector ArrayFormatting.HandlesMultipleElementsVector)

@@ -1,3 +1,4 @@
+#include "Utils/ArrayUtils.h"
 #include <iostream>
 #include <vector>
 #include <windows.h>
@@ -96,18 +97,6 @@ DWORD WINAPI marker_thread(LPVOID params)
     return 0;
 }
 
-void print_array(const vector<int>& arr)
-{
-    EnterCriticalSection(&cs);
-    cout << "[ ";
-    for (int element : arr) 
-    {
-        cout << element << " ";
-    }
-    cout << "]" << endl;
-    LeaveCriticalSection(&cs);
-}
-
 int main()
 {
     int arraySize;
@@ -168,8 +157,7 @@ int main()
         }
         
         cout << "\nAll active threads are blocked. Array state:" << endl;
-        print_array(arr);
-
+        Utils::printArray(arr, cs);
         int terminate_id_input = -1;
         int terminate_idx = -1;
         bool id_found = false;
@@ -201,7 +189,7 @@ int main()
         WaitForSingleObject(hMarkers[terminate_idx], INFINITE);
         
         cout << "Thread #" << terminate_id_input << " has terminated. Array state after cleanup:" << endl;
-        print_array(arr);
+        Utils::printArray(arr, cs);
 
         CloseHandle(hMarkers[terminate_idx]);
         CloseHandle(hBlockedEvents[terminate_idx]);
