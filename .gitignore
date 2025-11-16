@@ -1,8 +1,17 @@
-# Compiled output
+# CMake / Build files
+/build/
+/_deps/
 *.exe
 *.obj
 *.o
 *.dll
+*.lib
+*.a
+*.so
+compile_commands.json
+
+# IDE-specific
+.vs/
 
 # VS Code specific
 .vscode/

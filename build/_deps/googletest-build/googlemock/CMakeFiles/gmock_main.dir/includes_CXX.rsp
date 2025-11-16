@@ -1,1 +1,0 @@
--isystem "D:/VS/OS/os-lab-3/build/_deps/googletest-src/googlemock/include" -isystem "D:/VS/OS/os-lab-3/build/_deps/googletest-src/googlemock" -isystem "D:/VS/OS/os-lab-3/build/_deps/googletest-src/googletest/include" -isystem "D:/VS/OS/os-lab-3/build/_deps/googletest-src/googletest"
