@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "Utils/ArrayUtils.h"
+#include "ArrayUtils.h"
 
 using namespace std;
 
